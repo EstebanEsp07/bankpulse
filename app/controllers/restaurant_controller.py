@@ -15,5 +15,5 @@ def list_restaurants():
         guests = int(request.args.get("guests", "2"))
     except ValueError:
         raise DomainError("guests debe ser un entero", 400)
-    found = svc.search_restaurants(day, guests)
+    found = svc.search_restaurants(day, guests, request.args.get("city"))
     return {"date": day.isoformat(), "guests": guests, "results": [restaurant_view(r, s) for r, s in found]}
