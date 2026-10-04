@@ -20,3 +20,8 @@ def create_reservation():
     day = svc.parse_date(data.get("date"))
     reservation = svc.create_reservation(customer_id, restaurant_id, day, guests)
     return reservation_view(reservation), 201
+
+@bp.get("/reservations/<int:reservation_id>")
+def get_reservation(reservation_id):
+    """HU-BP-02: GET /api/reservations/<id> (confirmación de la reserva)."""
+    return reservation_view(svc.get_reservation(reservation_id))
