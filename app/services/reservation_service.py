@@ -23,12 +23,14 @@ def available_seats(restaurant, day):
     return restaurant.seats_per_day - int(booked)
 
 
-def search_restaurants(day, guests):
+def search_restaurants(day, guests, city=None):
     """HU-BP-01: restaurantes con cupo suficiente para la fecha y comensales."""
     if guests < 1:
         raise DomainError("El número de comensales debe ser al menos 1", 400)
     result = []
     for r in Restaurant.query.order_by(Restaurant.name).all():
+        if city and r.city.lower() != city.lower():
+            continue
         seats = available_seats(r, day)
         if seats >= guests:
             result.append((r, seats))
