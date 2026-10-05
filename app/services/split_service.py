@@ -7,6 +7,9 @@ def compute_shares(total_cents, mode, members):
     """Calcula las partes. En modo equal el residuo se reparte en centavos."""
     if len(members) < 2:
         raise DomainError("Se requieren al menos 2 integrantes", 422)
+    names = [m["name"].strip().lower() for m in members]
+    if len(set(names)) != len(names):
+        raise DomainError("Los nombres de los integrantes no pueden repetirse", 422)
     if mode == "equal":
         base, rest = divmod(total_cents, len(members))
         return [
@@ -35,4 +38,12 @@ def create_split(owner_id, description, total_cents, mode, members):
     split.shares = [SplitShare(member_name=n, amount_cents=a) for n, a in shares]
     db.session.add(split)
     db.session.commit()
+    return split
+
+
+def get_split(split_id):
+    """HU-BP-10: recupera una división con el estado de cada parte."""
+    split = db.session.get(ExpenseSplit, split_id)
+    if not split:
+        raise DomainError("División no encontrada", 404)
     return split

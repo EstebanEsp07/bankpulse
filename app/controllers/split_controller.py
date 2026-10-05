@@ -22,3 +22,13 @@ def create_split():
     if not all(isinstance(m, dict) and m.get("name") for m in members):
         raise DomainError("Cada integrante requiere 'name'", 422)
     return split_view(svc.create_split(owner_id, description, total_cents, mode, members)), 201
+
+
+@bp.get("/splits/<int:split_id>")
+def get_split(split_id):
+    """HU-BP-10: GET /api/splits/<id> con resumen de pagado y pendiente."""
+    split = svc.get_split(split_id)
+    view = split_view(split)
+    view["paid_cents"] = sum(s.amount_cents for s in split.shares if s.status == "PAID")
+    view["pending_cents"] = sum(s.amount_cents for s in split.shares if s.status == "PENDING")
+    return view
