@@ -1,8 +1,11 @@
-from flask import Blueprint
+from datetime import date
+
+from flask import Blueprint, request
 
 from ..extensions import db
 from ..models import Customer, Membership
 from ..services.errors import DomainError
+from ..services.reservation_service import parse_date
 from ..views.presenters import membership_view
 
 bp = Blueprint("membership", __name__, url_prefix="/api")
@@ -16,4 +19,5 @@ def get_membership(customer_id):
     membership = Membership.query.filter_by(customer_id=customer_id).first()
     if not membership:
         raise DomainError("El cliente no tiene membresía activa", 404)
-    return membership_view(membership)
+    on_day = parse_date(request.args["on"]) if "on" in request.args else date.today()
+    return membership_view(membership, on_day)
