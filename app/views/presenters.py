@@ -1,5 +1,5 @@
 """Vista (representación JSON): convierte entidades del Modelo en respuestas."""
-
+from datetime import date
 
 def restaurant_view(restaurant, seats_left):
     return {
@@ -24,11 +24,14 @@ def reservation_view(r):
     }
 
 
-def membership_view(m):
+def membership_view(m, on_day=None):
+    on_day = on_day or date.today()
     return {
         "customer_id": m.customer_id,
         "tier": m.tier,
         "valid_until": m.valid_until.isoformat(),
+        "active": m.valid_until >= on_day,
+        "days_remaining": max((m.valid_until - on_day).days, 0),
         "benefits": [b.strip() for b in m.benefits.split(";") if b.strip()],
     }
 
