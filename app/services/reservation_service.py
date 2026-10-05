@@ -6,6 +6,8 @@ from ..extensions import db
 from ..models import Customer, Reservation, Restaurant
 from .errors import DomainError
 
+MAX_GUESTS_PER_RESERVATION = 12
+
 
 def parse_date(value):
     try:
@@ -41,6 +43,10 @@ def create_reservation(customer_id, restaurant_id, day, guests):
     """HU-BP-02: reserva con garantía simulada (sin pasarela real de pagos)."""
     if guests < 1:
         raise DomainError("El número de comensales debe ser al menos 1", 400)
+    if guests > MAX_GUESTS_PER_RESERVATION:
+        raise DomainError(
+            f"Una reserva admite como máximo {MAX_GUESTS_PER_RESERVATION} comensales", 422
+        )
     if not db.session.get(Customer, customer_id):
         raise DomainError("Cliente no encontrado", 404)
     restaurant = db.session.get(Restaurant, restaurant_id)
@@ -57,4 +63,11 @@ def create_reservation(customer_id, restaurant_id, day, guests):
     )
     db.session.add(reservation)
     db.session.commit()
+    return reservation
+    
+def get_reservation(reservation_id):
+    """HU-BP-02: recupera una reserva para mostrar su confirmación."""
+    reservation = db.session.get(Reservation, reservation_id)
+    if not reservation:
+        raise DomainError("Reserva no encontrada", 404)
     return reservation
